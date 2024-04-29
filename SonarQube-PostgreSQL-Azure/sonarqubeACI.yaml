@@ -1,0 +1,86 @@
+define: &dpl_name ${DEPLOY_NAME}
+define: &fqdn ${DEPLOY_FQDN}
+define: &sa_acc_key ${SA_ACC_KEY}
+define: &sa_name ${SA_NAME}
+define: &db_user_name ${DB_USER_NAME}
+define: &db_pass ${DB_PASS}
+define: &ws_id ${WS_ID}
+define: &ws_res_id ${WS_RES_ID}
+define: &ws_acc_key ${WS_ACC_KEY}
+define: &jdbc_url ${JDBC_URL}
+
+name: *dpl_name
+apiVersion: '2021-10-01'
+location: westeurope
+
+properties:
+  containers:
+
+### SonarQube container
+  - name: sonarqube
+    properties:
+      image: sonarqube:community
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 3
+      ports:
+      - protocol: tcp
+        port: 9000
+      volumeMounts:
+      - name: sonarqube-data
+        mountPath: /opt/sonarqube/data
+        readOnly: false
+      - name: sonarqube-extensions
+        mountPath: /opt/sonarqube/extensions
+        readOnly: false
+      - name: sonarqube-logs
+        mountPath: /opt/sonarqube/logs
+        readOnly: false
+      environmentVariables:
+      - name: SONAR_JDBC_URL
+        value: *jdbc_url
+      - name: SONAR_JDBC_USERNAME
+        value: *db_user_name
+      - name: SONAR_JDBC_PASSWORD
+        secureValue: *db_pass
+      - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+        value: true
+
+   
+  volumes:
+
+### SonarQube Volumes
+  - name: sonarqube-data
+    azureFile:
+      shareName: sonarqubedata
+      readOnly: false
+      storageAccountName: *sa_name
+      storageAccountKey: *sa_acc_key
+  - name: sonarqube-extensions
+    azureFile:
+      shareName: sonarqubeextensions
+      readOnly: false
+      storageAccountName: *sa_name
+      storageAccountKey: *sa_acc_key
+  - name: sonarqube-logs
+    azureFile:
+      shareName: sonarqubelogs
+      readOnly: false
+      storageAccountName: *sa_name
+      storageAccountKey: *sa_acc_key
+
+  osType: Linux
+  sku: Standard
+  ipAddress:
+    type: Public
+    dnsNameLabel: *fqdn
+    ports:
+    - protocol: tcp
+      port: 9000
+  diagnostics:
+    logAnalytics:
+      workspaceId: *ws_id
+      workspaceKey: *ws_acc_key
+      workspaceResourceId: *ws_res_id
+      logType: ContainerInstanceLogs
