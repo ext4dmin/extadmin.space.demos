@@ -1,0 +1,68 @@
+---
+- hosts: maingroup
+  become: yes
+  remote_user: root
+
+  tasks:
+    - name: Create MONITORING directory
+      ansible.builtin.file:
+        path: /MONITORING
+        state: directory
+        mode: '0777'  
+
+    - name: Create prometheus directory
+      ansible.builtin.file:
+        path: /MONITORING/prometheus
+        state: directory
+        mode: '0777'
+
+    - name: Create prometheus config directory
+      ansible.builtin.file:
+        path: /MONITORING/prometheus/config
+        state: directory
+        mode: '0777'
+      
+    - name: Create prometheus data directory
+      ansible.builtin.file:
+        path: /MONITORING/prometheus/data
+        state: directory
+        mode: '0777'
+
+    - name: Copy prometheus conf
+      ansible.builtin.copy:
+        src: ../prometheus/
+        dest: /MONITORING/prometheus/config/
+        owner: root
+        group: root
+        mode: '0744'
+
+    - name: Create Docker directory
+      ansible.builtin.file:
+        path: /opt/docker-compose/grafana-pdc
+        state: directory
+        mode: '0755'
+
+    - name: Copy docker compose fie
+      ansible.builtin.copy:
+        src: ../docker/docker-compose.grafana-pdc.yaml
+        dest: /opt/docker-compose/grafana-pdc/docker-compose.grafana-pdc.yaml
+        owner: root
+        group: root
+        mode: '0744'
+    - name: Copy docker compose env file
+      ansible.builtin.copy:
+        src: ../docker/grafana-pdc.env
+        dest: /opt/docker-compose/grafana-pdc/grafana-pdc.env
+        owner: root
+        group: root
+        mode: '0744'
+    
+    - name: Compose up grafana-pdc
+      ansible.builtin.shell: |
+          docker compose -f docker-compose.grafana-pdc.yaml up -d
+      args:
+        chdir: /opt/docker-compose/grafana-pdc
+
+
+    
+

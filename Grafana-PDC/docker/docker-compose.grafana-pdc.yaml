@@ -1,0 +1,34 @@
+name: grafana-pdc
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090/tcp"
+    networks:
+      - grafana-pdc
+    volumes:
+      - type: bind
+        source: /MONITORING/prometheus/config
+        target: /etc/prometheus
+      - type: bind
+        source: /MONITORING/prometheus/data
+        target: /prometheus
+
+  pdc-agent:
+    image: grafana/pdc-agent
+    container_name: pdc-agent
+    restart: always
+    command: ["-token", "${TOKEN}", "-cluster", "${CLUSTER}", "-gcloud-hosted-grafana-id", "${HOSTED_GRAFANA_ID}"]
+    secrets:
+      - param
+    networks:
+      - grafana-pdc
+
+networks:
+  grafana-pdc:
+
+secrets:
+  param:
+    file: ./grafana-pdc.env
