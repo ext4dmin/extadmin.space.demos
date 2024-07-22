@@ -1,0 +1,39 @@
+name: gitea-demo
+
+services:
+  db:
+    container_name: gitea-pgsql
+    image: postgres:14
+    restart: always
+    env_file:
+      - pgsql.env
+    networks:
+      - gitea
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+
+  server:
+    container_name: gitea-server
+    image: gitea/gitea
+    restart: always
+    env_file:
+      - gitea.env
+    networks:
+      - gitea
+    volumes:
+      - ./gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "22:22"
+    depends_on:
+      - db
+  
+volumes:
+  postgres-db-volume:
+
+networks:
+  gitea:
+    name: gitea-net

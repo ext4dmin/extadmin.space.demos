@@ -1,0 +1,18 @@
+name: gitea-ar
+
+services:
+  runner:
+    image: gitea/act_runner
+    container_name: gitea-ar
+    env_file:
+      - ./act_runner.env
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitea
+networks:
+  gitea:
+    name: gitea-net
+    external: true
