@@ -1,0 +1,82 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+version: '2'
+
+services:
+  registry:
+    image: docker.io/bitnami/harbor-registry:2
+    env_file:
+      - ./env/registry.env
+    volumes:
+      - registry_data:/storage
+      - ./config/registry/:/etc/registry/:ro
+  registryctl:
+    image: docker.io/bitnami/harbor-registryctl:2
+    env_file:
+      - ./env/registryctl.env
+    volumes:
+      - registry_data:/storage
+      - ./config/registry/:/etc/registry/:ro
+      - ./config/registryctl/config.yml:/etc/registryctl/config.yml:ro
+  postgresql:
+    image: docker.io/bitnami/postgresql:13
+    container_name: harbor-db
+    env_file:
+      - ./env/postgresql.env
+    volumes:
+      - postgresql_data:/bitnami/postgresql
+  core:
+    image: docker.io/bitnami/harbor-core:2
+    container_name: harbor-core
+    depends_on:
+      - registry
+    env_file:
+      - ./env/core.env
+    volumes:
+      - core_data:/data
+      - ./config/core/app.conf:/etc/core/app.conf:ro
+      - ./config/core/private_key.pem:/etc/core/private_key.pem:ro
+  portal:
+    image: docker.io/bitnami/harbor-portal:2
+    container_name: harbor-portal
+    depends_on:
+      - core
+  jobservice:
+    image: docker.io/bitnami/harbor-jobservice:2
+    container_name: harbor-jobservice
+    depends_on:
+      - redis
+      - core
+    env_file:
+      - ./env/jobservice.env
+    volumes:
+      - jobservice_data:/var/log/jobs
+      - ./config/jobservice/config.yml:/etc/jobservice/config.yml:ro
+  redis:
+    image: docker.io/bitnami/redis:7.4
+    env_file:
+      - ./env/redis.env
+  harbor-nginx:
+    image: docker.io/bitnami/nginx:1.27
+    container_name: nginx
+    volumes:
+      - ./config/proxy/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf:ro
+    ports:
+      - '80:8080'
+    depends_on:
+      - postgresql
+      - registry
+      - core
+      - portal
+volumes:
+  registry_data:
+    driver: local
+  core_data:
+    driver: local
+  jobservice_data:
+    driver: local
+  postgresql_data:
+    driver: local
+networks:
+  harbor_net:
