@@ -1,0 +1,12 @@
+# Demo project by ext4dmin.
+
+apiVersion: v2
+name: sonatype-nexus-ext4dmin
+description: A Helm chart for Kubernetes. Sonatype Nexus 3 with internal database and ingress (http://localhost).
+type: application
+version: 0.1.0
+appVersion: "3.78.1-alpine"
+annotations:
+  category: repository,docker,helm,devops
+  tags: nexus,sonatype,repository,docker,helm,devops
+  licenses: Apache-2.0
