@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sonatype-nexus-ext4dmin.fullname" . }}
+  labels:
+    {{- include "sonatype-nexus-ext4dmin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "sonatype-nexus-ext4dmin.selectorLabels" . | nindent 4 }}
