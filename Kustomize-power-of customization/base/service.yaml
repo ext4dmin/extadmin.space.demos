@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-webapp # Will be suffixed by the nameSuffix from the overlay/<stage>/kustomization.yaml
+#  namespace: demo-webapp-staging # Will be replaced by the namespace from the overlay/<stage>/kustomization.yaml
+  labels:
+    app: webapp # Will be replaced by the label from the overlay/<stage>/kustomization.yaml  
+spec:
+  selector:
+    app: webapp # Will be replaced by the label from the overlay/<stage>/kustomization.yaml  
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+#   nodePort: 30088 # Will be replaced by the label from the overlay/<stage>/kustomization.yaml

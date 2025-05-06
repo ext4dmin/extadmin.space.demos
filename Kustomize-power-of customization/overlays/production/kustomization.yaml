@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: demo-webapp
+    path: deployment-patch.yaml
+  - target:
+      kind: Service
+      name: demo-webapp
+    patch: |-
+      - op: replace
+        path: /spec/ports/0/nodePort
+        value: 30080    
+
+nameSuffix: -prod
+
+namespace: demo-webapp-prod
+
+labels:
+  - includeSelectors: true
+    includeTemplates: true
+    pairs:
+      app: demo-webapp-staging
+      environment: staging
+
+replicas:
+  - name: demo-webapp
+    count: 2
+  

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-webapp # Will be suffixed by the nameSuffix from the overlay/<stage>/kustomization.yaml
+  # namespace: demo-webapp-staging # Will be replaced by the namespace from the overlay/<stage>/kustomization.yaml
+  labels:
+    app: webapp # Will be replaced by the label from the base/kustomization.yaml and the overlays/<stage>/kustomization.yaml
+spec:
+  replicas: 1 # Will be replaced by the label the overlays/<stage>/kustomization.yaml
+  selector:
+    matchLabels:
+      app: webapp # Will be replaced by the label from the base/kustomization.yaml and the overlays/<stage>/kustomization.yaml
+  template:
+    metadata:
+      labels:
+        app: webapp # Will be replaced by the label from the base/kustomization.yaml and the overlays/<stage>/kustomization.yaml
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        resources:
+          requests:
+            memory: "128Mi" # Will be replaced by the label the overlays/<stage>/deployment-patch.yaml
+            cpu: "250m" # Will be replaced by the label the overlays/<stage>/deployment-patch.yaml
+          limits:
+            memory: "128Mi" # Will be replaced by the label the overlays/<stage>/deployment-patch.yaml
+            cpu: "250m" # Will be replaced by the label the overlays/<stage>/deployment-patch.yaml
+        ports:
+        - containerPort: 80
+        volumeMounts:
+            - name: web-content
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: web-content
+          configMap:
+            name: web-content
